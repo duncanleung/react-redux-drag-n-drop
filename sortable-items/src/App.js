@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import update from "react/lib/update";
+import update from "immutability-helper";
 import { DragDropContext } from "react-dnd";
 import HTML5backend from "react-dnd-html5-backend";
 
@@ -47,6 +47,21 @@ class App extends Component {
         }
       ]
     };
+
+    this.moveCard = this.moveCard.bind(this);
+  }
+
+  moveCard(dragIndex, hoverIndex) {
+    const { cards } = this.state;
+    const draggedCard = cards[dragIndex];
+
+    this.setState(
+      update(this.state, {
+        cards: {
+          $splice: [[dragIndex, 1], [hoverIndex, 0, draggedCard]]
+        }
+      })
+    );
   }
 
   render() {
@@ -55,11 +70,17 @@ class App extends Component {
     return (
       <ContainerWrapper>
         {cards.map((card, index) => (
-          <Card key={card.id} index={index} id={card.id} text={card.text} />
+          <Card
+            key={card.id}
+            index={index}
+            id={card.id}
+            text={card.text}
+            moveCard={this.moveCard}
+          />
         ))}
       </ContainerWrapper>
     );
   }
 }
 
-export default App;
+export default DragDropContext(HTML5backend)(App);
